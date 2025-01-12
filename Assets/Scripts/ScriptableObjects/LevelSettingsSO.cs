@@ -1,18 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class LevelSettingsSO : MonoBehaviour
+[CreateAssetMenu(fileName = "LevelSettings", menuName = "LevelSettings")]
+public class LevelSettingsSO : ScriptableObject
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public Vector2Int levelSize;
+    public int numberOfColors;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public int DefaultCondition;
+    public int Condition1Value;
+    public int Condition2Value;
+    public int Condition3Value;
 }
