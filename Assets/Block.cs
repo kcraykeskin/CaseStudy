@@ -24,7 +24,7 @@ public class Block : MonoBehaviour
         spriteRenderer.sprite = sprite;
     }
 
-    private void ChangeSpriteCondition(int i)
+    public void ChangeSpriteCondition(int i)
     {
         spriteRenderer.sprite = GridManager.Instance.selectedColorSprites[colorNumber].sprites[i];
     }
@@ -33,6 +33,28 @@ public class Block : MonoBehaviour
     {
         gridPosition = gPostion;
         spriteRenderer.sortingOrder = 10 + gridPosition.y;
+    }
+
+    public void StartMatching()
+    {
+        GridManager.Instance.TempMatchList.Clear();
+        GridManager.Instance.TempMatchList.Add(this);
+        CheckMatchesAround(colorNumber);
+    }
+
+    public void CheckMatchesAround(int i)
+    {
+        foreach (var block in GridManager.Instance.GetBlocksAround(this))
+        {
+            if (block && !block.isFalling)
+            {
+                if ((colorNumber == block.colorNumber) && !GridManager.Instance.TempMatchList.Contains(block))
+                {
+                    GridManager.Instance.TempMatchList.Add(block);
+                    block.CheckMatchesAround(colorNumber);
+                }
+            }
+        }
     }
 }
 

@@ -5,8 +5,7 @@ public class LevelSettingsSO : ScriptableObject
 {
     public Vector2Int levelSize;
     public int numberOfColors;
-
-    public int DefaultCondition;
+    
     public int Condition1Value;
     public int Condition2Value;
     public int Condition3Value;

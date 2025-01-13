@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class GridManager : MonoBehaviour
@@ -24,6 +23,10 @@ public class GridManager : MonoBehaviour
     public BoardTile[] boardTiles;
     public Block[] blocks;
 
+    [Header("MatchList")] 
+    public List<Block> TempMatchList;
+    public List<Match> MatchList;
+
     private void Awake()
     {
         if (Instance == null)
@@ -34,13 +37,15 @@ public class GridManager : MonoBehaviour
 
     void Start()
     {   
-        selectedColorSprites = allColorSprites.OrderBy(x => Random.value)
+        selectedColorSprites = allColorSprites
+            .OrderBy(_ => Guid.NewGuid())
             .Take(levelSettings.numberOfColors)
             .ToList();
         CreateGridPositions(levelSettings.levelSize.x, levelSettings.levelSize.y);
         CreateBoard(levelSettings.levelSize.x, levelSettings.levelSize.y);
         blocks = new Block[levelSettings.levelSize.x * levelSettings.levelSize.y];
         FillTheGrid(levelSettings.levelSize.x, levelSettings.levelSize.y);
+        FindMatches(levelSettings.levelSize.x, levelSettings.levelSize.y);
     }
     
     private void CreateGridPositions(int xSize, int ySize)
@@ -63,7 +68,6 @@ public class GridManager : MonoBehaviour
             for (int x = 0; x < xSize; x++)
             {
                 var boardTile = Instantiate(boardTilePrefab.GetComponent<BoardTile>(), gridPositions[x + (y * xSize)], Quaternion.identity, boardPivot);
-                Instantiate(blockPrefab, gridPositions[x + (y * xSize)], Quaternion.identity);
                 boardTile.Init(new Vector2Int(x,y));
                 boardTiles[x + (y * xSize)] = boardTile;
             }
@@ -78,12 +82,99 @@ public class GridManager : MonoBehaviour
             {
                 var block = Instantiate(blockPrefab.GetComponent<Block>(), gridPositions[x + (y * xSize)], Quaternion.identity);
                 int rand = Random.Range(0, levelSettings.numberOfColors);
-                print(rand);
+                block.name = $"Block{x} {y}";
                 block.Init(new Vector2Int(x, y), rand);
                 blocks[x + (y * xSize)] = block;
             }
         }
     }
+
+    public void FindMatches(int xSize, int ySize)
+    {
+        MatchList.Clear();
+        TempMatchList.Clear();
+    
+        for (int y = 0; y < ySize; y++)
+        {
+            for (int x = 0; x < xSize; x++)
+            {
+                if (blocks[x + (y * xSize)] != null && 
+                    MatchList.SelectMany(i => i.MatchedBlocks).All(i => i != blocks[x + (y * xSize)]))
+                {
+                    blocks[x + (y * xSize)].StartMatching();
+                
+                    MatchList.Add(new Match { MatchedBlocks = new List<Block>(TempMatchList) });
+                    TempMatchList.Clear();
+                }
+            }
+        }
+
+        UpdateConditionSprites(xSize, ySize);
+    }
+
+    private void UpdateConditionSprites(int xSize, int ySize)
+    {
+        foreach (var match in MatchList)
+        {
+            int val = match.MatchedBlocks.Count;
+            foreach (var block in match.MatchedBlocks)
+            {
+                if (val <= levelSettings.Condition1Value)
+                {
+                    block.ChangeSpriteCondition(0);
+                }
+                else if (levelSettings.Condition1Value < val && val <= levelSettings.Condition2Value)
+                {
+                    block.ChangeSpriteCondition(1);
+                }
+                else if (levelSettings.Condition2Value < val && val <= levelSettings.Condition3Value)
+                {
+                    block.ChangeSpriteCondition(2);
+                }
+                else if (val > levelSettings.Condition3Value)
+                {
+                    block.ChangeSpriteCondition(3);
+                }
+            }
+        }
+    }
+
+
+    public List<Block> GetBlocksAround(Block block)
+    {
+        List<Block> tempList = new List<Block>();
+        Vector2Int pos = block.gridPosition;
+        int width = levelSettings.levelSize.x;
+        int height = levelSettings.levelSize.y;
+        
+        if (pos.x > 0 && blocks[(pos.x - 1) + (pos.y * width)])
+        {
+            tempList.Add(blocks[(pos.x - 1) + (pos.y * width)]);
+        }
+    
+        if (pos.x < width - 1 && blocks[(pos.x + 1) + (pos.y * width)])
+        {
+            tempList.Add(blocks[(pos.x + 1) + (pos.y * width)]);
+        }
+    
+        if (pos.y > 0 && blocks[pos.x + ((pos.y - 1) * width)])
+        {
+            tempList.Add(blocks[pos.x + ((pos.y - 1) * width)]);
+        }
+    
+        if (pos.y < height - 1 && blocks[pos.x + ((pos.y + 1) * width)])
+        {
+            tempList.Add(blocks[pos.x + ((pos.y + 1) * width)]);
+        }
+    
+        return tempList;
+    }
+}
+
+[Serializable]
+public class Match
+{
+    public List<Block> MatchedBlocks;
 }
 
 [Serializable]

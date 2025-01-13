@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelSize: {x: 4, y: 5}
   numberOfColors: 3
-  DefaultCondition: 0
-  Condition1Value: 0
-  Condition2Value: 0
-  Condition3Value: 0
+  Condition1Value: 4
+  Condition2Value: 6
+  Condition3Value: 8
