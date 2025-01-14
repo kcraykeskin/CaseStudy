@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class Block : MonoBehaviour
+public class Block : MonoBehaviour, IClickable
 {
     public SpriteRenderer spriteRenderer;
     public Sprite sprite;
@@ -29,7 +29,7 @@ public class Block : MonoBehaviour
         spriteRenderer.sprite = GridManager.Instance.selectedColorSprites[colorNumber].sprites[i];
     }
 
-    private void ChangeGridPosition(Vector2Int gPostion)
+    public void ChangeGridPosition(Vector2Int gPostion)
     {
         gridPosition = gPostion;
         spriteRenderer.sortingOrder = 10 + gridPosition.y;
@@ -55,6 +55,20 @@ public class Block : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void OnClick()
+    {
+        Match clickedGroup= (GridManager.Instance.GetMatchContaining(this));
+        if (clickedGroup.MatchedBlocks.Count >= 2)
+        {
+            GridManager.Instance.BlastMatch(clickedGroup);
+        }
+    }
+
+    public void Blast()
+    {
+        gameObject.SetActive(false);
     }
 }
 

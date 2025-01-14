@@ -169,13 +169,79 @@ public class GridManager : MonoBehaviour
     
         return tempList;
     }
+
+    public Match GetMatchContaining(Block block)
+    {
+        return MatchList.FirstOrDefault(m => m.MatchedBlocks.Contains(block));
+    }
+
+    public void BlastMatch(Match clickedGroup)
+    {
+        List<Block> tempBlocks = new List<Block>(clickedGroup.MatchedBlocks);
+        MatchList.Remove(clickedGroup);
+        foreach (var block in tempBlocks)
+        {
+            blocks[block.gridPosition.x + block.gridPosition.y * levelSettings.levelSize.y] = null;
+            block.Blast();
+        }
+
+        // ApplyGravity();
+    }
+
+    private void ApplyGravity()
+    {
+        for (int x = 0; x < levelSettings.levelSize.x; x++)
+        {
+            for (int y = 1; y < levelSettings.levelSize.y; y++)
+            {
+                if(!GetBlock(x,y))
+                {
+                    continue;
+                }
+                else
+                {
+                    int tempBottom = -1;
+                    for (int b = y; b <= 0; b--)
+                    {
+                        if (GetBlock(x, b))
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            tempBottom = b;
+                        }
+                    }
+
+                    if (tempBottom != -1 && !blocks[x + tempBottom*levelSettings.levelSize.y])
+                    {
+                        Block movingBlock = GetBlock(x,y);
+                        if (movingBlock)
+                        {
+                            blocks[x + tempBottom * levelSettings.levelSize.y] = blocks[x + y*levelSettings.levelSize.y];
+                            blocks[x + tempBottom * levelSettings.levelSize.y].ChangeGridPosition(new Vector2Int(x, y: tempBottom));
+                            blocks[x + tempBottom * levelSettings.levelSize.y].transform.position =
+                                gridPositions[x + tempBottom * levelSettings.levelSize.y];
+                            blocks[x + y * levelSettings.levelSize.y] = null;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private Block GetBlock(int x, int y)
+    {
+        return blocks[x + y * levelSettings.levelSize.y];
+    }
 }
 
 [Serializable]
 public class Match
 {
-    public List<Block> MatchedBlocks;
+    public List<Block> MatchedBlocks = new List<Block>();
 }
+
 
 [Serializable]
 public class ColorSprites
