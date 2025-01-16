@@ -27,6 +27,10 @@ public class GridManager : MonoBehaviour
     public List<Block> TempMatchList;
     public List<Match> MatchList;
 
+
+    private int xSize;
+    private int ySize;
+    
     private void Awake()
     {
         if (Instance == null)
@@ -36,19 +40,21 @@ public class GridManager : MonoBehaviour
     }
 
     void Start()
-    {   
+    {
+        xSize = levelSettings.levelSize.x;
+        ySize = levelSettings.levelSize.y;
         selectedColorSprites = allColorSprites
             .OrderBy(_ => Guid.NewGuid())
             .Take(levelSettings.numberOfColors)
             .ToList();
-        CreateGridPositions(levelSettings.levelSize.x, levelSettings.levelSize.y);
-        CreateBoard(levelSettings.levelSize.x, levelSettings.levelSize.y);
+        CreateGridPositions();
+        CreateBoard();
         blocks = new Block[levelSettings.levelSize.x * levelSettings.levelSize.y];
-        FillTheGrid(levelSettings.levelSize.x, levelSettings.levelSize.y);
-        FindMatches(levelSettings.levelSize.x, levelSettings.levelSize.y);
+        FillTheGrid();
+        FindMatches();
     }
     
-    private void CreateGridPositions(int xSize, int ySize)
+    private void CreateGridPositions()
     {
         gridPositions = new Vector2[xSize * ySize];
         for (int y = 0; y < ySize; y++)
@@ -60,7 +66,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    private void CreateBoard(int xSize, int ySize)
+    private void CreateBoard()
     {
         boardTiles = new BoardTile[xSize * ySize];
         for (int y = 0; y < ySize; y++)
@@ -74,7 +80,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public void FillTheGrid(int xSize, int ySize)
+    public void FillTheGrid()
     {
         for (int y = 0; y < ySize; y++)
         {
@@ -89,8 +95,9 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public void FindMatches(int xSize, int ySize)
+    public void FindMatches()
     {
+        
         MatchList.Clear();
         TempMatchList.Clear();
     
@@ -177,16 +184,15 @@ public class GridManager : MonoBehaviour
 
     public void BlastMatch(Match clickedGroup)
     {
-        List<Block> tempBlocks = new List<Block>(clickedGroup.MatchedBlocks);
-        MatchList.Remove(clickedGroup);
-        foreach (var block in tempBlocks)
+        foreach (Block block in clickedGroup.MatchedBlocks)
         {
-            blocks[block.gridPosition.x + block.gridPosition.y * levelSettings.levelSize.y] = null;
+            blocks[block.gridPosition.x + block.gridPosition.y * levelSettings.levelSize.x] = null;
             block.Blast();
         }
-
-        // ApplyGravity();
+        ApplyGravity();
     }
+
+
 
     private void ApplyGravity()
     {
@@ -198,41 +204,36 @@ public class GridManager : MonoBehaviour
                 {
                     continue;
                 }
-                else
+                
+                int tempBottom = -1;
+                for (int b = y; b >= 0; b--)
                 {
-                    int tempBottom = -1;
-                    for (int b = y; b <= 0; b--)
+                    if ( blocks[x + b * levelSettings.levelSize.x] != null)
                     {
-                        if (GetBlock(x, b))
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            tempBottom = b;
-                        }
+                        continue;
                     }
-
-                    if (tempBottom != -1 && !blocks[x + tempBottom*levelSettings.levelSize.y])
+                    tempBottom = b;
+                }
+                if (tempBottom != -1 && blocks[x + tempBottom * levelSettings.levelSize.x] == null)
+                {
+                    Block movingBlock = GetBlock(x,y);
+                    if (movingBlock)
                     {
-                        Block movingBlock = GetBlock(x,y);
-                        if (movingBlock)
-                        {
-                            blocks[x + tempBottom * levelSettings.levelSize.y] = blocks[x + y*levelSettings.levelSize.y];
-                            blocks[x + tempBottom * levelSettings.levelSize.y].ChangeGridPosition(new Vector2Int(x, y: tempBottom));
-                            blocks[x + tempBottom * levelSettings.levelSize.y].transform.position =
-                                gridPositions[x + tempBottom * levelSettings.levelSize.y];
-                            blocks[x + y * levelSettings.levelSize.y] = null;
-                        }
+                        blocks[x + tempBottom * levelSettings.levelSize.x] = blocks[x + y*levelSettings.levelSize.x];
+                        blocks[x + tempBottom * levelSettings.levelSize.x].ChangeGridPosition(new Vector2Int(x, y: tempBottom));
+                        blocks[x + tempBottom * levelSettings.levelSize.x].transform.position =
+                            gridPositions[x + tempBottom * levelSettings.levelSize.x];
+                        blocks[x + y * levelSettings.levelSize.x] = null;
                     }
                 }
             }
         }
+        FindMatches();
     }
 
     private Block GetBlock(int x, int y)
     {
-        return blocks[x + y * levelSettings.levelSize.y];
+        return blocks[x + y * levelSettings.levelSize.x];
     }
 }
 
