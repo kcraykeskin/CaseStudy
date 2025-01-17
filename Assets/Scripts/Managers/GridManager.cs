@@ -221,8 +221,7 @@ public class GridManager : MonoBehaviour
                     {
                         blocks[x + tempBottom * levelSettings.levelSize.x] = blocks[x + y*levelSettings.levelSize.x];
                         blocks[x + tempBottom * levelSettings.levelSize.x].ChangeGridPosition(new Vector2Int(x, y: tempBottom));
-                        blocks[x + tempBottom * levelSettings.levelSize.x].transform.position =
-                            gridPositions[x + tempBottom * levelSettings.levelSize.x];
+                        blocks[x + tempBottom * levelSettings.levelSize.x].MoveTo(gridPositions[x + tempBottom * levelSettings.levelSize.x]);
                         blocks[x + y * levelSettings.levelSize.x] = null;
                     }
                 }

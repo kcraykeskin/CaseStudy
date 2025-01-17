@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -10,6 +11,8 @@ public class Block : MonoBehaviour, IClickable
     public int colorNumber;
     public Vector2Int gridPosition;
     public bool isFalling;
+    
+    private Tween fallTween;
     
     public void Init(Vector2Int gPostion, int cNumber)
     {
@@ -69,6 +72,18 @@ public class Block : MonoBehaviour, IClickable
     public void Blast()
     {
         gameObject.SetActive(false);
+    }
+    
+    public void MoveTo(Vector3 targetPosition)
+    {
+        if (fallTween != null && fallTween.IsActive())
+        {
+            fallTween.Kill();
+        }
+
+        fallTween = transform.DOMove(targetPosition, Mathf.Abs(Vector3.Distance(targetPosition, transform.position))/14)
+            .SetEase(Ease.InSine)
+            .OnComplete(() => fallTween = null); 
     }
 }
 
