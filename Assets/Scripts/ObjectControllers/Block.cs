@@ -12,6 +12,7 @@ public class Block : MonoBehaviour, IClickable
     public Vector2Int gridPosition;
     public bool isFalling;
     
+    [SerializeField] public Animator animator;
     private Tween fallTween;
     
     public void Init(Vector2Int gPostion, int cNumber)
@@ -67,6 +68,10 @@ public class Block : MonoBehaviour, IClickable
         {
             GridManager.Instance.BlastMatch(clickedGroup);
         }
+        else
+        {
+            animator.SetTrigger("WrongClickShake");
+        }
     }
 
     public void Blast()
@@ -83,7 +88,11 @@ public class Block : MonoBehaviour, IClickable
 
         fallTween = transform.DOMove(targetPosition, Mathf.Abs(Vector3.Distance(targetPosition, transform.position))/14)
             .SetEase(Ease.InSine)
-            .OnComplete(() => fallTween = null); 
+            .OnComplete(() =>
+            {
+                animator.SetTrigger("GroundHit");
+                fallTween = null;
+            }); 
     }
 }
 

@@ -30,6 +30,8 @@ public class GridManager : MonoBehaviour
 
     private int xSize;
     private int ySize;
+    private float inBetweenX;
+    private float inBetweenY;
     
     private void Awake()
     {
@@ -39,7 +41,7 @@ public class GridManager : MonoBehaviour
             Destroy(gameObject);
     }
 
-    void Start()
+    public void Initialize()
     {
         xSize = levelSettings.levelSize.x;
         ySize = levelSettings.levelSize.y;
@@ -54,17 +56,22 @@ public class GridManager : MonoBehaviour
         FindMatches();
     }
     
-    private void CreateGridPositions()
-    {
-        gridPositions = new Vector2[xSize * ySize];
-        for (int y = 0; y < ySize; y++)
-        {
-            for (int x = 0; x < xSize; x++)
-            {
-                gridPositions[x + (y * xSize)] = (Vector2)boardPivot.position +new Vector2(x * spriteHalfWidth, y * spriteHalfWidth);
-            }
-        }
-    }
+   private void CreateGridPositions()
+   {
+       gridPositions = new Vector2[xSize * ySize];
+       float offsetX = (xSize - 1) * spriteHalfWidth / 2f;
+       float offsetY = (ySize - 1) * spriteHalfWidth / 2f;
+       Vector2 offset = new Vector2(-offsetX, -offsetY);
+   
+       for (int y = 0; y < ySize; y++)
+       {
+           for (int x = 0; x < xSize; x++)
+           {
+               gridPositions[x + (y * xSize)] = 
+                   (Vector2)boardPivot.position + offset + new Vector2(x * spriteHalfWidth, y * spriteHalfWidth);
+           }
+       }
+   }
 
     private void CreateBoard()
     {
@@ -227,12 +234,45 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
+        FillEmptyTiles();
         FindMatches();
     }
 
+    private void FillEmptyTiles()
+    {
+        for (int x = 0; x < xSize; x++)
+        {
+            int emptyTileCount = 0;
+            for (int y = 0; y < ySize; y++)
+            {
+                if (blocks[x + y * xSize] == null)
+                {
+                    emptyTileCount++;
+                }
+            }
+
+            for (int i = 0; i < emptyTileCount; i++)
+            {
+                Vector2 topPos = new Vector2(gridPositions[x].x, (ySize+i) * spriteHalfWidth);
+                var block = Instantiate(blockPrefab.GetComponent<Block>(),topPos , Quaternion.identity);
+                int rand = Random.Range(0, levelSettings.numberOfColors);
+                int tempY = ySize - (emptyTileCount - i);
+                block.name = $"Block{x} {tempY}";
+                block.Init(new Vector2Int(x, tempY), rand);
+                blocks[x + (tempY * xSize)] = block;
+                block.MoveTo(gridPositions[x + (tempY * xSize)]);
+            }
+        }
+    }
     private Block GetBlock(int x, int y)
     {
         return blocks[x + y * levelSettings.levelSize.x];
+    }
+    
+    public void GetGridDimensions(out float width, out float height)
+    {
+        width = (xSize - 1) * spriteHalfWidth * 2f;
+        height = (ySize - 1) * spriteHalfWidth * 2f;
     }
 }
 
