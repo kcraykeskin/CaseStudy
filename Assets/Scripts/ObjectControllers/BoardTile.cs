@@ -17,7 +17,7 @@ public class BoardTile : MonoBehaviour
 
     private void CreateBorders()
     {
-        Vector2Int levelSize = GridManager.Instance.levelSettings.levelSize;
+        Vector2Int levelSize = GameManager.Instance.GridManager.levelSettings.levelSize;
 
         if (inGridPosition.x == 0)
         {

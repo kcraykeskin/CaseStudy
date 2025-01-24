@@ -4,20 +4,21 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
+    public static GameManager Instance;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
+        if (Instance == null)
+            Instance = this;
+        else if (Instance != this)
             Destroy(gameObject);
-            return;
-        }
-        Instance = this;
     }
 
     [SerializeField] public GridManager GridManager;
     [SerializeField] public CameraSizeHandler CameraSizeHandler;
+    [SerializeField] public ObjectPool BlockPool;
+    [SerializeField] public ObjectPool TilePool;
+    [SerializeField] public ObjectPool FramePool;
     
     private void Start()
     {

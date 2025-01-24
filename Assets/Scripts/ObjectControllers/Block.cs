@@ -24,13 +24,13 @@ public class Block : MonoBehaviour, IClickable
     private void ChangeColor(int cNumber)
     {
         colorNumber = cNumber;
-        sprite = GridManager.Instance.selectedColorSprites[colorNumber].sprites[0];
+        sprite = GameManager.Instance.GridManager.selectedColorSprites[colorNumber].sprites[0];
         spriteRenderer.sprite = sprite;
     }
 
     public void ChangeSpriteCondition(int i)
     {
-        spriteRenderer.sprite = GridManager.Instance.selectedColorSprites[colorNumber].sprites[i];
+        spriteRenderer.sprite = GameManager.Instance.GridManager.selectedColorSprites[colorNumber].sprites[i];
     }
 
     public void ChangeGridPosition(Vector2Int gPostion)
@@ -41,20 +41,20 @@ public class Block : MonoBehaviour, IClickable
 
     public void StartMatching()
     {
-        GridManager.Instance.TempMatchList.Clear();
-        GridManager.Instance.TempMatchList.Add(this);
+        GameManager.Instance.GridManager.TempMatchList.Clear();
+        GameManager.Instance.GridManager.TempMatchList.Add(this);
         CheckMatchesAround(colorNumber);
     }
 
     public void CheckMatchesAround(int i)
     {
-        foreach (var block in GridManager.Instance.GetBlocksAround(this))
+        foreach (var block in GameManager.Instance.GridManager.GetBlocksAround(this))
         {
             if (block && !block.isFalling)
             {
-                if ((colorNumber == block.colorNumber) && !GridManager.Instance.TempMatchList.Contains(block))
+                if ((colorNumber == block.colorNumber) && !GameManager.Instance.GridManager.TempMatchList.Contains(block))
                 {
-                    GridManager.Instance.TempMatchList.Add(block);
+                    GameManager.Instance.GridManager.TempMatchList.Add(block);
                     block.CheckMatchesAround(colorNumber);
                 }
             }
@@ -63,10 +63,10 @@ public class Block : MonoBehaviour, IClickable
 
     public void OnClick()
     {
-        Match clickedGroup= (GridManager.Instance.GetMatchContaining(this));
+        Match clickedGroup= (GameManager.Instance.GridManager.GetMatchContaining(this));
         if (clickedGroup.MatchedBlocks.Count >= 2)
         {
-            GridManager.Instance.BlastMatch(clickedGroup);
+            GameManager.Instance.GridManager.BlastMatch(clickedGroup);
         }
         else
         {

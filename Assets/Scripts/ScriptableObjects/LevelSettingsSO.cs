@@ -3,10 +3,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "LevelSettings", menuName = "LevelSettings")]
 public class LevelSettingsSO : ScriptableObject
 {
-    [Range(2, 10)]
+    [Range(1, 10)]
     public int numberOfRows = 2;
 
-    [Range(2, 10)]
+    [Range(1, 10)]
     public int numberOfColumns = 2;
     
     [Range(1, 6)]

@@ -6,7 +6,6 @@ using Random = UnityEngine.Random;
 
 public class GridManager : MonoBehaviour
 {
-    public static GridManager Instance;
     [Header("Poola Alınacaklar")]
     [SerializeField] private GameObject boardTilePrefab;
     [SerializeField] private GameObject blockPrefab;
@@ -19,6 +18,8 @@ public class GridManager : MonoBehaviour
     public LevelSettingsSO levelSettings;
     public List<ColorSprites> selectedColorSprites;
     public Transform boardPivot;
+    public Transform blockContainer;
+    public Transform boardTileContainer;
     public Vector2[] gridPositions; 
     public BoardTile[] boardTiles;
     public Block[] blocks;
@@ -33,14 +34,6 @@ public class GridManager : MonoBehaviour
     private float inBetweenX;
     private float inBetweenY;
     
-    private void Awake()
-    {
-        if (Instance == null)
-            Instance = this;
-        else if (Instance != this)
-            Destroy(gameObject);
-    }
-
     public void Initialize()
     {
         xSize = levelSettings.levelSize.x;
@@ -80,7 +73,7 @@ public class GridManager : MonoBehaviour
         {
             for (int x = 0; x < xSize; x++)
             {
-                var boardTile = Instantiate(boardTilePrefab.GetComponent<BoardTile>(), gridPositions[x + (y * xSize)], Quaternion.identity, boardPivot);
+                var boardTile = Instantiate(boardTilePrefab.GetComponent<BoardTile>(), gridPositions[x + (y * xSize)], Quaternion.identity, boardTileContainer);
                 boardTile.Init(new Vector2Int(x,y));
                 boardTiles[x + (y * xSize)] = boardTile;
             }
@@ -93,7 +86,7 @@ public class GridManager : MonoBehaviour
         {
             for (int x = 0; x < xSize; x++)
             {
-                var block = Instantiate(blockPrefab.GetComponent<Block>(), gridPositions[x + (y * xSize)], Quaternion.identity);
+                var block = Instantiate(blockPrefab.GetComponent<Block>(), gridPositions[x + (y * xSize)], Quaternion.identity, blockContainer);
                 int rand = Random.Range(0, levelSettings.numberOfColors);
                 block.name = $"Block{x} {y}";
                 block.Init(new Vector2Int(x, y), rand);
@@ -254,7 +247,7 @@ public class GridManager : MonoBehaviour
             for (int i = 0; i < emptyTileCount; i++)
             {
                 Vector2 topPos = new Vector2(gridPositions[x].x, (ySize+i) * spriteHalfWidth);
-                var block = Instantiate(blockPrefab.GetComponent<Block>(),topPos , Quaternion.identity);
+                var block = Instantiate(blockPrefab.GetComponent<Block>(),topPos , Quaternion.identity, blockContainer);
                 int rand = Random.Range(0, levelSettings.numberOfColors);
                 int tempY = ySize - (emptyTileCount - i);
                 block.name = $"Block{x} {tempY}";
