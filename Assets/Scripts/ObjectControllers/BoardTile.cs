@@ -6,8 +6,15 @@ public class BoardTile : MonoBehaviour
 {
     public Vector2Int inGridPosition;
 
-    public GameObject straightBorder;
-    public GameObject curvyBorder;
+    [SerializeField] private GameObject TopLine;
+    [SerializeField] private GameObject BottomLine;
+    [SerializeField] private GameObject RightLine;
+    [SerializeField] private GameObject LeftLine;
+    
+    [SerializeField] private GameObject LeftTopCurve;
+    [SerializeField] private GameObject LeftBottomCurve;
+    [SerializeField] private GameObject RightTopCurve;
+    [SerializeField] private GameObject RightBottomCurve;
     public void Init(Vector2Int gPosition)
     {
         GetComponent<SpriteRenderer>().size = new Vector2(2.5f, 2.9f);
@@ -17,50 +24,47 @@ public class BoardTile : MonoBehaviour
 
     private void CreateBorders()
     {
-        Vector2Int levelSize = GameManager.Instance.GridManager.levelSettings.levelSize;
-
+        Vector2Int levelSize = new Vector2Int(GameManager.Instance.GridManager.xSize, GameManager.Instance.GridManager.ySize);
+        
+        TopLine.SetActive(false);
+        BottomLine.SetActive(false);
+        RightLine.SetActive(false);
+        LeftLine.SetActive(false);
+        LeftTopCurve.SetActive(false);
+        LeftBottomCurve.SetActive(false);
+        RightTopCurve.SetActive(false);
+        RightBottomCurve.SetActive(false);
+        
         if (inGridPosition.x == 0)
         {
-            Instantiate(straightBorder.GetComponent<SpriteRenderer>(),
-                    transform.position + new Vector3(-1.3f, 0, 0), Quaternion.Euler(0, 0, 0), transform).size =
-                new Vector2(0.2f, 2.5f);
+            LeftLine.SetActive(true);
             if (inGridPosition.y == 0)
             {
-                Instantiate(curvyBorder.GetComponent<SpriteRenderer>(),
-                    transform.position + new Vector3(-1.19f, -1.39f, 0), Quaternion.Euler(0, 0, 90), transform);
+                LeftBottomCurve.SetActive(true);
             }
         }
         if (inGridPosition.y == 0)
         {
-            Instantiate(straightBorder.GetComponent<SpriteRenderer>(),
-                    transform.position + new Vector3(0, -1.5f, 0), Quaternion.Euler(0, 0, 90), transform).size =
-                new Vector2(0.2f, 2.2f);
+            BottomLine.SetActive(true);
             if (inGridPosition.x == levelSize.x - 1)
             {
-                Instantiate(curvyBorder.GetComponent<SpriteRenderer>(),
-                    transform.position + new Vector3(1.19f, -1.39f, 0), Quaternion.Euler(0, 0, 180), transform);
+                RightBottomCurve.SetActive(true);
             }
         }
         if (inGridPosition.x == levelSize.x - 1)
         {
-            Instantiate(straightBorder.GetComponent<SpriteRenderer>(), 
-                transform.position + new Vector3(1.3f, 0, 0), Quaternion.Euler(0, 0, 0), transform).size = 
-                new Vector2(0.2f, 2.5f);
+           RightLine.SetActive(true);
             if (inGridPosition.y == levelSize.y - 1)
             {
-                Instantiate(curvyBorder.GetComponent<SpriteRenderer>(),
-                    transform.position + new Vector3(1.19f, 1.39f, 0), Quaternion.Euler(0, 0, 270), transform);
+                RightTopCurve.SetActive(true);
             }
         }
         if (inGridPosition.y == levelSize.y - 1)
         {
-            Instantiate(straightBorder.GetComponent<SpriteRenderer>(), 
-                transform.position + new Vector3(0, 1.5f, 0), Quaternion.Euler(0, 0, 90), transform).size = 
-                new Vector2(0.2f, 2.2f);
+          TopLine.SetActive(true);
             if (inGridPosition.x == 0)
             {
-                Instantiate(curvyBorder.GetComponent<SpriteRenderer>(),
-                    transform.position + new Vector3(-1.19f, 1.39f, 0), Quaternion.Euler(0, 0, 0), transform);
+                LeftTopCurve.SetActive(true);
             }
         }
     }

@@ -76,7 +76,7 @@ public class Block : MonoBehaviour, IClickable
 
     public void Blast()
     {
-        gameObject.SetActive(false);
+        GameManager.Instance.BlockPool.Return(gameObject);
     }
     
     public void MoveTo(Vector3 targetPosition)

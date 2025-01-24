@@ -6,10 +6,6 @@ using Random = UnityEngine.Random;
 
 public class GridManager : MonoBehaviour
 {
-    [Header("Poola Alınacaklar")]
-    [SerializeField] private GameObject boardTilePrefab;
-    [SerializeField] private GameObject blockPrefab;
-
     [Header("GameSettingse Alınacaklar")] 
     [SerializeField] private float spriteHalfWidth = 2.2f;
     [SerializeField] public List<ColorSprites> allColorSprites;
@@ -29,10 +25,8 @@ public class GridManager : MonoBehaviour
     public List<Match> MatchList;
 
 
-    private int xSize;
-    private int ySize;
-    private float inBetweenX;
-    private float inBetweenY;
+    public int xSize;
+    public int ySize;
     
     public void Initialize()
     {
@@ -73,7 +67,7 @@ public class GridManager : MonoBehaviour
         {
             for (int x = 0; x < xSize; x++)
             {
-                var boardTile = Instantiate(boardTilePrefab.GetComponent<BoardTile>(), gridPositions[x + (y * xSize)], Quaternion.identity, boardTileContainer);
+                var boardTile = GameManager.Instance.TilePool.Get(gridPositions[x + (y * xSize)], Quaternion.identity, boardTileContainer).GetComponent<BoardTile>();
                 boardTile.Init(new Vector2Int(x,y));
                 boardTiles[x + (y * xSize)] = boardTile;
             }
@@ -86,7 +80,7 @@ public class GridManager : MonoBehaviour
         {
             for (int x = 0; x < xSize; x++)
             {
-                var block = Instantiate(blockPrefab.GetComponent<Block>(), gridPositions[x + (y * xSize)], Quaternion.identity, blockContainer);
+                var block = GameManager.Instance.BlockPool.Get(gridPositions[x + (y * xSize)], Quaternion.identity, blockContainer).GetComponent<Block>();
                 int rand = Random.Range(0, levelSettings.numberOfColors);
                 block.name = $"Block{x} {y}";
                 block.Init(new Vector2Int(x, y), rand);
@@ -247,7 +241,7 @@ public class GridManager : MonoBehaviour
             for (int i = 0; i < emptyTileCount; i++)
             {
                 Vector2 topPos = new Vector2(gridPositions[x].x, (ySize+i) * spriteHalfWidth);
-                var block = Instantiate(blockPrefab.GetComponent<Block>(),topPos , Quaternion.identity, blockContainer);
+                var block =GameManager.Instance.BlockPool.Get(topPos, Quaternion.identity, blockContainer).GetComponent<Block>();
                 int rand = Random.Range(0, levelSettings.numberOfColors);
                 int tempY = ySize - (emptyTileCount - i);
                 block.name = $"Block{x} {tempY}";

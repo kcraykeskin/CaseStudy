@@ -11,6 +11,6 @@ public class CameraSizeHandler : MonoBehaviour
          float width;
          float height;
          GameManager.Instance.GridManager.GetGridDimensions(out width, out height);
-         cameraMain.orthographicSize = Mathf.Max((width / 2)+1, (height / 2)+1);
+         cameraMain.orthographicSize = Mathf.Max(Mathf.Max((width / 2)+2, (height / 2)+2), 11);
     }
 }

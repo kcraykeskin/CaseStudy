@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81b1429233cfe4a46a8ceb5f059aef68, type: 3}
   m_Name: TestLevel
   m_EditorClassIdentifier: 
-  numberOfRows: 10
-  numberOfColumns: 10
+  numberOfRows: 3
+  numberOfColumns: 3
   numberOfColors: 3
   Condition1Value: 4
   Condition2Value: 6
