@@ -21,7 +21,7 @@ public class Block : MonoBehaviour, IClickable
         ChangeColor(cNumber);
     }
 
-    private void ChangeColor(int cNumber)
+    public void ChangeColor(int cNumber)
     {
         colorNumber = cNumber;
         sprite = GameManager.Instance.GridManager.selectedColorSprites[colorNumber].sprites[0];

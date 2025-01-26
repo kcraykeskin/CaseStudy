@@ -11,7 +11,7 @@ public class GridManager : MonoBehaviour
     [SerializeField] public List<ColorSprites> allColorSprites;
 
     [Header("Kalacaklar")] 
-    public LevelSettingsSO levelSettings;
+    private LevelSettingsSO levelSettings;
     public List<ColorSprites> selectedColorSprites;
     public Transform boardPivot;
     public Transform blockContainer;
@@ -30,6 +30,7 @@ public class GridManager : MonoBehaviour
     
     public void Initialize()
     {
+        levelSettings = GameManager.Instance.levelSettings;
         xSize = levelSettings.levelSize.x;
         ySize = levelSettings.levelSize.y;
         selectedColorSprites = allColorSprites
@@ -240,7 +241,7 @@ public class GridManager : MonoBehaviour
 
             for (int i = 0; i < emptyTileCount; i++)
             {
-                Vector2 topPos = new Vector2(gridPositions[x].x, (ySize+i) * spriteHalfWidth);
+                Vector2 topPos = new Vector2(gridPositions[x].x, (ySize/2+i+1) * spriteHalfWidth);
                 var block =GameManager.Instance.BlockPool.Get(topPos, Quaternion.identity, blockContainer).GetComponent<Block>();
                 int rand = Random.Range(0, levelSettings.numberOfColors);
                 int tempY = ySize - (emptyTileCount - i);
@@ -260,6 +261,31 @@ public class GridManager : MonoBehaviour
     {
         width = (xSize - 1) * spriteHalfWidth * 2f;
         height = (ySize - 1) * spriteHalfWidth * 2f;
+    }
+
+    public void ResetBoard()
+    {
+        for (int i = 0; i < boardTiles.Length; i++)
+        {
+            GameManager.Instance.TilePool.Return(boardTiles[i].gameObject);
+        }
+        
+        for (int i = 0; i < blocks.Length; i++)
+        {
+            GameManager.Instance.BlockPool.Return(blocks[i].gameObject);
+        }
+    }
+
+    public void CreateDeadLock()
+    {
+        for (int x = 0; x < xSize; x++)
+        {
+            for (int y = 0; y < ySize; y++)
+            {
+                GetBlock(x, y).ChangeColor((x+y)%levelSettings.numberOfColors);
+            }
+        }
+        FindMatches();
     }
 }
 
