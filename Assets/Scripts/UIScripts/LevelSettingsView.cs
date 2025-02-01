@@ -20,6 +20,9 @@ public class LevelSettingsView : MonoBehaviour
     public TMP_InputField condition1Input;
     public TMP_InputField condition2Input;
     public TMP_InputField condition3Input;
+    
+    public TMP_InputField[] MissionInputs = new TMP_InputField[6];
+    public TMP_InputField MoveCountInput;
 
     private void Start()
     {
@@ -44,17 +47,43 @@ public class LevelSettingsView : MonoBehaviour
         numberOfRowsSlider.onValueChanged.AddListener(value => numberOfRowsText.text = Mathf.RoundToInt(value).ToString());
         numberOfColorsSlider.onValueChanged.AddListener(value => numberOfColorsText.text = Mathf.RoundToInt(value).ToString());
 
-        condition1Input.onEndEdit.AddListener(value => TryParseCondition(value, out settings.Condition1Value));
-        condition2Input.onEndEdit.AddListener(value => TryParseCondition(value, out settings.Condition2Value));
-        condition3Input.onEndEdit.AddListener(value => TryParseCondition(value, out settings.Condition3Value));
-    }
+        condition1Input.onEndEdit.AddListener(value => int.TryParse(value, out settings.Condition1Value));
+        condition2Input.onEndEdit.AddListener(value => int.TryParse(value, out settings.Condition2Value));
+        condition3Input.onEndEdit.AddListener(value => int.TryParse(value, out settings.Condition3Value));
+        
+         numberOfColorsSlider.onValueChanged.AddListener(UpdateMissionValues);
+        
+         for (int i = 0; i < 6; i++)
+         {
+             int index = i;
+             MissionInputs[index].text = settings.MissionValues[index].ToString();
+             MissionInputs[index].onEndEdit.AddListener(value =>
+             {
+                 int.TryParse(value, out settings.MissionValues[index]);
+             });
+         }
 
-    private void TryParseCondition(string value, out int result)
+
+        
+        MoveCountInput.text = settings.MoveCount.ToString();
+        MoveCountInput.onEndEdit.AddListener(value => int.TryParse(value, out settings.MoveCount));
+        UpdateMissionValues(settings.numberOfColors);
+    }
+    
+    private void UpdateMissionValues(float a )
     {
-        if (!int.TryParse(value, out result))
+        for (int i = 0; i < MissionInputs.Length; i++)
         {
-            Debug.LogWarning("Invalid input. Please enter a valid integer.");
-            result = 0;
+            if (i < a)
+            {
+                MissionInputs[i].gameObject.SetActive(true);
+            }
+            else
+            {
+                MissionInputs[i].text = "0";
+                settings.MissionValues[i] = 0;
+                MissionInputs[i].gameObject.SetActive(false);
+            }
         }
     }
 }
