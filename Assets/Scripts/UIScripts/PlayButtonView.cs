@@ -12,13 +12,13 @@ public class PlayButtonView : ButtonViewBase
         LevelSettingsSO settings = GameManager.Instance.levelSettings;
         if ( 1 < settings.Condition1Value  && settings.Condition1Value < settings.Condition2Value && settings.Condition2Value < settings.Condition3Value)
         {
-            text.text = "";
+            if (text != null) text.text = "";
             GameManager.Instance.StartLevel();
             panel.gameObject.SetActive(false);
         }
         else
         {
-            text.text = "Conditions must be in ascending order.";
+            if (text != null) text.text = "Conditions must be in ascending order.";
         }
     }
 }

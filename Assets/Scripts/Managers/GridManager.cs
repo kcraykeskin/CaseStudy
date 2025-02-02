@@ -30,6 +30,7 @@ public class GridManager : MonoBehaviour
     
     public void Initialize()
     {
+        ResetBoard();
         levelSettings = GameManager.Instance.levelSettings;
         xSize = levelSettings.levelSize.x;
         ySize = levelSettings.levelSize.y;
@@ -179,8 +180,10 @@ public class GridManager : MonoBehaviour
 
     public void BlastMatch(Match clickedGroup)
     {
+        GameManager.Instance.DecreaseMoveCount();
         foreach (Block block in clickedGroup.MatchedBlocks)
         {
+            GameManager.Instance.UpdateMissionValues(block.colorNumber);
             blocks[block.gridPosition.x + block.gridPosition.y * levelSettings.levelSize.x] = null;
             block.Blast();
         }

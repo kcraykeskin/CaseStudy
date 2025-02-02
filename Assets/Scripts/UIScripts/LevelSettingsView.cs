@@ -76,13 +76,13 @@ public class LevelSettingsView : MonoBehaviour
         {
             if (i < a)
             {
-                MissionInputs[i].gameObject.SetActive(true);
+                MissionInputs[i].transform.parent.gameObject.SetActive(true);
             }
             else
             {
                 MissionInputs[i].text = "0";
                 settings.MissionValues[i] = 0;
-                MissionInputs[i].gameObject.SetActive(false);
+                MissionInputs[i].transform.parent.gameObject.SetActive(false);
             }
         }
     }
