@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +13,7 @@ public class TopPanelView : MonoBehaviour
 
    public void Initialize()
    {
-      MoveCountText.text = GameManager.Instance.levelSettings.MoveCount == 0 ?  "" : GameManager.Instance.levelSettings.MoveCount.ToString();
+      MoveCountText.text = GameManager.Instance.levelSettings.MoveCount == 0 ?  "" : GameManager.Instance.levelSettings.MissionValues.All(x => x == 0) ? "" : GameManager.Instance.levelSettings.MoveCount.ToString();
 
       for (int i= 0; i < 6; i++)
       {

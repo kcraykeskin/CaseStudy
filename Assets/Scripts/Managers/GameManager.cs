@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
 
     public int MoveCount;
     public int[] MissionValues = new int[6];
-    private bool isClickOn;
+    public bool isClickOn;
     
 
     private void Awake()
@@ -61,6 +61,8 @@ public class GameManager : MonoBehaviour
 
     public void DecreaseMoveCount()
     {
+        if(levelSettings.MoveCount == 0 || levelSettings.MissionValues.All(x => x == 0))
+            return;
         MoveCount--;
         TopPanelView.UpdateView();
         if (MoveCount <= 0)

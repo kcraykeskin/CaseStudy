@@ -4576,7 +4576,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 11
+  orthographic size: 11.92
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -5380,6 +5380,7 @@ MonoBehaviour:
   TilePool: {fileID: 1364535855}
   MoveCount: 0
   MissionValues: 000000000000000000000000000000000000000000000000
+  isClickOn: 0
 --- !u!4 &1075930913
 Transform:
   m_ObjectHideFlags: 0
@@ -8255,38 +8256,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spriteHalfWidth: 2.2
   allColorSprites:
-  - blockColor: 0
-    sprites:
+  - sprites:
     - {fileID: 21300000, guid: b43e8f0d0dd61614bb039606585773c3, type: 3}
     - {fileID: 21300000, guid: dfbaa047455378e4a993f6028b63bc69, type: 3}
     - {fileID: 21300000, guid: 2fd036eddf1af284da7a095554ec3777, type: 3}
     - {fileID: 21300000, guid: 83b0e7bc9b324924b92d2f50666e2482, type: 3}
-  - blockColor: 1
-    sprites:
+  - sprites:
     - {fileID: 21300000, guid: 039b2a226106e8f41affdc635dbfd02f, type: 3}
     - {fileID: 21300000, guid: f3701fd70e80b0a43bce09c1f4a20aa3, type: 3}
     - {fileID: 21300000, guid: de7d3bf2cc7f42d49b4ab594ec414de6, type: 3}
     - {fileID: 21300000, guid: 78668e9919288d64a928d8b9518915cc, type: 3}
-  - blockColor: 2
-    sprites:
+  - sprites:
     - {fileID: 21300000, guid: 1bfdfe56f805c0148a9388f57aeeba58, type: 3}
     - {fileID: 21300000, guid: 3aeef7e7b8265444d8e45c1558ef1d77, type: 3}
     - {fileID: 21300000, guid: 09f12d4923396c147a513b327e14e50f, type: 3}
     - {fileID: 21300000, guid: 3102508c799e76141a4000707ae61c56, type: 3}
-  - blockColor: 3
-    sprites:
+  - sprites:
     - {fileID: 21300000, guid: fecdbd05e67f8ef4a911abefc851c5d7, type: 3}
     - {fileID: 21300000, guid: a0f364d8f24cf8646a6cfea834cfc91b, type: 3}
     - {fileID: 21300000, guid: 9a4455156c9d786469c6ce4bc8381c45, type: 3}
     - {fileID: 21300000, guid: 6b53ecfebf418f64d975576514f39835, type: 3}
-  - blockColor: 4
-    sprites:
+  - sprites:
     - {fileID: 21300000, guid: f9b76b922c8938546934b977e708e577, type: 3}
     - {fileID: 21300000, guid: d636963f992c451419ba3a23d2370085, type: 3}
     - {fileID: 21300000, guid: 473e2b5eaf3ea61479a4eca36917dbc3, type: 3}
     - {fileID: 21300000, guid: 9e2ccc2a11096bb4cadcfb7f5ad5e075, type: 3}
-  - blockColor: 5
-    sprites:
+  - sprites:
     - {fileID: 21300000, guid: 8304ea8e1898b6b4fa2a0370b0c585c0, type: 3}
     - {fileID: 21300000, guid: 556a5820616f7f34bbf660ce79e974c5, type: 3}
     - {fileID: 21300000, guid: b8d4f7fa1474e5d4f80d5fbd444d7a75, type: 3}

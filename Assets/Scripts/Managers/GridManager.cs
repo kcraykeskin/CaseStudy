@@ -1,16 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class GridManager : MonoBehaviour
 {
-    [Header("GameSettingse Alınacaklar")] 
     [SerializeField] private float spriteHalfWidth = 2.2f;
     [SerializeField] public List<ColorSprites> allColorSprites;
-
-    [Header("Kalacaklar")] 
     private LevelSettingsSO levelSettings;
     public List<ColorSprites> selectedColorSprites;
     public Transform boardPivot;
@@ -277,12 +275,20 @@ public class GridManager : MonoBehaviour
     {
         for (int i = 0; i < boardTiles.Length; i++)
         {
-            GameManager.Instance.TilePool.Return(boardTiles[i].gameObject);
+            if (boardTiles[i] != null)
+            {
+                GameManager.Instance.TilePool.Return(boardTiles[i].gameObject);
+                boardTiles[i] = null;
+            }
         }
         
         for (int i = 0; i < blocks.Length; i++)
         {
-            GameManager.Instance.BlockPool.Return(blocks[i].gameObject);
+            if (blocks[i] != null)
+            {
+                GameManager.Instance.BlockPool.Return(blocks[i].gameObject);
+                blocks[i] = null;  
+            }
         }
     }
 
@@ -300,64 +306,89 @@ public class GridManager : MonoBehaviour
 
     private void SolveDeadLock()
     {
-        int[] colorCount = new int[levelSettings.numberOfColors];
-        for (int i = 0; i < levelSettings.numberOfColors; i++)
+        GameManager.Instance.isClickOn =false;
+        //A virtual delay to let user recognize that there is a deadlock occuring
+        DOVirtual.DelayedCall(1f, () =>
         {
-            colorCount[i] =  blocks.Count(x => x.colorNumber == i);
-        }
-        //Pick a random block from the most frequent color
-        int maxIndex = colorCount
-            .Select((count, index) => new { Count = count, Index = index })
-            .OrderByDescending(x => x.Count)
-            .First()
-            .Index;
-        
-        Block baseBlock = blocks.Where(x => x.colorNumber == maxIndex)
-            .OrderBy(_ => Guid.NewGuid())
-            .FirstOrDefault();
-        
-        //Virtual grid to keep track of blocks that already moved
-        Block[] tempBlocks = new Block[levelSettings.levelSize.x * levelSettings.levelSize.y];
-        tempBlocks[baseBlock.gridPosition.x +  baseBlock.gridPosition.x* ySize] = baseBlock;
-        
-        //Pick another random block to move next to the match
-        Block blockToMove = blocks.Where(x => x.colorNumber == maxIndex && !tempBlocks.Contains(x))
-            .OrderBy(_ => Guid.NewGuid())
-            .FirstOrDefault();
-        
-        //Pick a random block to move next to create a match
-        Block moveNextToBlock = tempBlocks.Where(x => x.colorNumber == blockToMove.colorNumber)
-            .OrderBy(_ => Guid.NewGuid())
-            .FirstOrDefault();
-        
-        //Find a neighbor to switch with that is the same color with one of your neighbors (to create two matches with one swap if possible)
-        //Create a neighbor color list 
-        var neighborsOfBlockToMove = GetNeighbors(blockToMove)
-            .Where(block => block != null )  
-            .Select(block => block.colorNumber);
-        
-        //check if there are any matching neighbors
-        Block blockToSwapWith = GetNeighbors(moveNextToBlock)
-            .Where(block => block != null && neighborsOfBlockToMove.Contains(block.colorNumber) && !tempBlocks.Contains(block)).OrderBy(_ => Guid.NewGuid())
-            .FirstOrDefault();
-
-        //if there are swap their places
-        if (!blockToSwapWith)
-        {
-            blockToSwapWith =GetNeighbors(moveNextToBlock).Where(block => block != null && !tempBlocks.Contains(block)).OrderBy(_ => Guid.NewGuid())
+            int[] colorCount = new int[levelSettings.numberOfColors];
+            for (int i = 0; i < levelSettings.numberOfColors; i++)
+            {
+                colorCount[i] =  blocks.Count(x => x.colorNumber == i);
+            }
+            //if there are no blocks of the same color then reset the board
+            if (colorCount
+                    .Select((count, index) => new { Count = count, Index = index })
+                    .OrderByDescending(x => x.Count)
+                    .First().Count < 2)
+            {
+                for (int i = 0; i < blocks.Length; i++)
+                {
+                    GameManager.Instance.BlockPool.Return(blocks[i].gameObject);
+                    blocks[i] = null;
+                }
+                FillEmptyTiles();
+                FindMatches();
+                GameManager.Instance.isClickOn =true;
+                return;
+            }
+            //Pick a random block from the most frequent color
+            int maxIndex = colorCount
+                .Select((count, index) => new { Count = count, Index = index })
+                .OrderByDescending(x => x.Count)
+                .First()
+                .Index;
+            Block baseBlock = blocks.Where(x => x.colorNumber == maxIndex)
+                .OrderBy(_ => Guid.NewGuid())
                 .FirstOrDefault();
-        }
-        
-        Vector2Int tempVector = new Vector2Int(blockToSwapWith.gridPosition.x, blockToSwapWith.gridPosition.y);
-        blockToSwapWith.ChangeGridPosition( new Vector2Int(blockToMove.gridPosition.x, blockToMove.gridPosition.y));
-        blockToMove.ChangeGridPosition(tempVector);
-        tempBlocks[blockToMove.gridPosition.x +  blockToMove.gridPosition.x* ySize] = blockToMove;
-        tempBlocks[blockToSwapWith.gridPosition.x +  blockToSwapWith.gridPosition.x* ySize] = blockToSwapWith;
-        foreach (var b in tempBlocks)
-        {
-            b.MoveTo(gridPositions[b.gridPosition.x + b.gridPosition.y* xSize]);
-        }
-
+            //Virtual grid to keep track of blocks that already moved
+            Block[] tempBlocks = new Block[levelSettings.levelSize.x * levelSettings.levelSize.y];
+            tempBlocks[baseBlock.gridPosition.x +  baseBlock.gridPosition.y * xSize] = baseBlock;
+            for (int x = 0; x < Math.Max( xSize/2,  ySize/2); x++)
+            {
+                //Pick another random block to move next to the match
+                Block blockToMove = blocks.Where(x => x.colorNumber == maxIndex && !tempBlocks.Contains(x))
+                    .OrderBy(_ => Guid.NewGuid())
+                    .FirstOrDefault();
+                //Pick a random block to move next to create a match
+                Block moveNextToBlock = tempBlocks.Where(x => x && x.colorNumber == blockToMove.colorNumber)
+                    .OrderBy(_ => Guid.NewGuid())
+                    .FirstOrDefault();
+                //Find a neighbor to switch with that is the same color with one of your neighbors (to create two matches with one swap if possible)
+                //Create a neighbor color list 
+                var neighborsOfBlockToMove = GetNeighbors(blockToMove)
+                    .Where(block => block != null )  
+                    .Select(block => block.colorNumber);
+                
+                //check if there are any matching neighbors if not pick a random neighbor
+                Block blockToSwapWith = GetNeighbors(moveNextToBlock)
+                    .Where(block => block != null && neighborsOfBlockToMove.Contains(block.colorNumber) && !tempBlocks.Contains(block)).OrderBy(_ => Guid.NewGuid())
+                    .FirstOrDefault();
+                if (!blockToSwapWith)
+                {
+                    blockToSwapWith = GetNeighbors(moveNextToBlock)
+                        .Where(block => block != null && !tempBlocks.Contains(block)).OrderBy(_ => Guid.NewGuid())
+                        .FirstOrDefault();
+                }
+                //if there are swap their places
+                if (!blockToSwapWith)
+                {
+                    blockToSwapWith =GetNeighbors(moveNextToBlock).Where(block => block != null && !tempBlocks.Contains(block)).OrderBy(_ => Guid.NewGuid())
+                        .FirstOrDefault();
+                }
+                
+                Vector2Int tempVector = new Vector2Int(blockToSwapWith.gridPosition.x, blockToSwapWith.gridPosition.y);
+                blockToSwapWith.ChangeGridPosition( new Vector2Int(blockToMove.gridPosition.x, blockToMove.gridPosition.y));
+                blockToMove.ChangeGridPosition(tempVector);
+                tempBlocks[blockToMove.gridPosition.x +  blockToMove.gridPosition.y* xSize] = blockToMove;
+                tempBlocks[blockToSwapWith.gridPosition.x +  blockToSwapWith.gridPosition.y* xSize] = blockToSwapWith;
+                blocks[blockToMove.gridPosition.x +  blockToMove.gridPosition.y* xSize] = blockToMove;
+                blocks[blockToSwapWith.gridPosition.x +  blockToSwapWith.gridPosition.y* xSize] = blockToSwapWith;
+                blockToMove.MoveTo(gridPositions[blockToMove.gridPosition.x +  blockToMove.gridPosition.y* xSize]);
+                blockToSwapWith.MoveTo(gridPositions[blockToSwapWith.gridPosition.x +  blockToSwapWith.gridPosition.y* xSize]);   
+            }
+            DOVirtual.DelayedCall(0.5f, () => GameManager.Instance.isClickOn = true);
+            FindMatches();
+        });
     }
 
     private Block[] GetNeighbors(Block moveNextToBlock)
@@ -395,15 +426,5 @@ public class Match
 [Serializable]
 public class ColorSprites
 {
-    public BlockColor blockColor;
     public Sprite[] sprites;
 } 
-public enum BlockColor
-{
-    Blue,
-    Green,
-    Pink,
-    Purple,
-    Red,
-    Yellow,
-}

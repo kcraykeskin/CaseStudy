@@ -38,6 +38,7 @@ public class Block : MonoBehaviour, IClickable
     {
         gridPosition = gPostion;
         spriteRenderer.sortingOrder = 10 + gridPosition.y;
+        name = $"Block{gridPosition.x} {gridPosition.y}";
     }
 
     public void StartMatching()
@@ -86,8 +87,7 @@ public class Block : MonoBehaviour, IClickable
         {
             fallTween.Kill();
         }
-        print(Mathf.Abs(Vector3.Distance(targetPosition, transform.position))/14);
-        fallTween = transform.DOMove(targetPosition, Math.Min(Mathf.Abs(Vector3.Distance(targetPosition, transform.position))/14, 0.2f))
+        fallTween = transform.DOMove(targetPosition, Math.Min(Mathf.Abs(Vector3.Distance(targetPosition, transform.position))/14, 0.3f))
             .SetEase(Ease.InSine)
             .OnComplete(() =>
             {
