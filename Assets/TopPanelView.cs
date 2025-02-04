@@ -20,6 +20,7 @@ public class TopPanelView : MonoBehaviour
          {
             MissionTexts[i].text = GameManager.Instance.levelSettings.MissionValues[i].ToString();
             MissionImages[i].sprite = GameManager.Instance.GridManager.selectedColorSprites[i].sprites[0];
+            MissionTexts[i].transform.parent.gameObject.SetActive(true);
          }
          else
          {

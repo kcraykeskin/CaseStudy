@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -85,8 +86,8 @@ public class Block : MonoBehaviour, IClickable
         {
             fallTween.Kill();
         }
-
-        fallTween = transform.DOMove(targetPosition, Mathf.Abs(Vector3.Distance(targetPosition, transform.position))/14)
+        print(Mathf.Abs(Vector3.Distance(targetPosition, transform.position))/14);
+        fallTween = transform.DOMove(targetPosition, Math.Min(Mathf.Abs(Vector3.Distance(targetPosition, transform.position))/14, 0.2f))
             .SetEase(Ease.InSine)
             .OnComplete(() =>
             {
