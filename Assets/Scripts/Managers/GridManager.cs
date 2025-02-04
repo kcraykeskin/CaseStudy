@@ -111,8 +111,11 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
-
         UpdateConditionSprites(xSize, ySize);
+        if (!MatchList.Any(x => x.MatchedBlocks.Count > 1))
+        {
+            SolveDeadLock();
+        }
     }
 
     private void UpdateConditionSprites(int xSize, int ySize)
@@ -257,7 +260,11 @@ public class GridManager : MonoBehaviour
     }
     private Block GetBlock(int x, int y)
     {
-        return blocks[x + y * levelSettings.levelSize.x];
+        if (x < 0 || x >= xSize || y < 0 || y >= ySize)
+        {
+            return null;
+        }
+        return blocks[x + y * xSize];
     }
     
     public void GetGridDimensions(out float width, out float height)
@@ -289,6 +296,92 @@ public class GridManager : MonoBehaviour
             }
         }
         FindMatches();
+    }
+
+    private void SolveDeadLock()
+    {
+        int[] colorCount = new int[levelSettings.numberOfColors];
+        for (int i = 0; i < levelSettings.numberOfColors; i++)
+        {
+            colorCount[i] =  blocks.Count(x => x.colorNumber == i);
+        }
+        //Pick a random block from the most frequent color
+        int maxIndex = colorCount
+            .Select((count, index) => new { Count = count, Index = index })
+            .OrderByDescending(x => x.Count)
+            .First()
+            .Index;
+        
+        Block baseBlock = blocks.Where(x => x.colorNumber == maxIndex)
+            .OrderBy(_ => Guid.NewGuid())
+            .FirstOrDefault();
+        
+        //Virtual grid to keep track of blocks that already moved
+        Block[] tempBlocks = new Block[levelSettings.levelSize.x * levelSettings.levelSize.y];
+        tempBlocks[baseBlock.gridPosition.x +  baseBlock.gridPosition.x* ySize] = baseBlock;
+        
+        //Pick another random block to move next to the match
+        Block blockToMove = blocks.Where(x => x.colorNumber == maxIndex && !tempBlocks.Contains(x))
+            .OrderBy(_ => Guid.NewGuid())
+            .FirstOrDefault();
+        
+        //Pick a random block to move next to create a match
+        Block moveNextToBlock = tempBlocks.Where(x => x.colorNumber == blockToMove.colorNumber)
+            .OrderBy(_ => Guid.NewGuid())
+            .FirstOrDefault();
+        
+        //Find a neighbor to switch with that is the same color with one of your neighbors (to create two matches with one swap if possible)
+        //Create a neighbor color list 
+        var neighborsOfBlockToMove = GetNeighbors(blockToMove)
+            .Where(block => block != null )  
+            .Select(block => block.colorNumber);
+        
+        //check if there are any matching neighbors
+        Block blockToSwapWith = GetNeighbors(moveNextToBlock)
+            .Where(block => block != null && neighborsOfBlockToMove.Contains(block.colorNumber) && !tempBlocks.Contains(block)).OrderBy(_ => Guid.NewGuid())
+            .FirstOrDefault();
+
+        //if there are swap their places
+        if (!blockToSwapWith)
+        {
+            blockToSwapWith =GetNeighbors(moveNextToBlock).Where(block => block != null && !tempBlocks.Contains(block)).OrderBy(_ => Guid.NewGuid())
+                .FirstOrDefault();
+        }
+        
+        Vector2Int tempVector = new Vector2Int(blockToSwapWith.gridPosition.x, blockToSwapWith.gridPosition.y);
+        blockToSwapWith.ChangeGridPosition( new Vector2Int(blockToMove.gridPosition.x, blockToMove.gridPosition.y));
+        blockToMove.ChangeGridPosition(tempVector);
+        tempBlocks[blockToMove.gridPosition.x +  blockToMove.gridPosition.x* ySize] = blockToMove;
+        tempBlocks[blockToSwapWith.gridPosition.x +  blockToSwapWith.gridPosition.x* ySize] = blockToSwapWith;
+        foreach (var b in tempBlocks)
+        {
+            b.MoveTo(gridPositions[b.gridPosition.x + b.gridPosition.y* xSize]);
+        }
+
+    }
+
+    private Block[] GetNeighbors(Block moveNextToBlock)
+    {
+        Block[] tempBlocks = new Block[4];
+
+        if (GetBlock(moveNextToBlock.gridPosition.x, moveNextToBlock.gridPosition.y - 1))
+        {
+            tempBlocks[0] = GetBlock(moveNextToBlock.gridPosition.x, moveNextToBlock.gridPosition.y - 1);
+        }
+        if (GetBlock(moveNextToBlock.gridPosition.x-1, moveNextToBlock.gridPosition.y ))
+        {
+            tempBlocks[1] = GetBlock(moveNextToBlock.gridPosition.x-1, moveNextToBlock.gridPosition.y);
+        }
+        if (GetBlock(moveNextToBlock.gridPosition.x+1, moveNextToBlock.gridPosition.y ))
+        {
+            tempBlocks[2] = GetBlock(moveNextToBlock.gridPosition.x+1, moveNextToBlock.gridPosition.y);
+        }
+        if (GetBlock(moveNextToBlock.gridPosition.x, moveNextToBlock.gridPosition.y + 1))
+        {
+            tempBlocks[3] = GetBlock(moveNextToBlock.gridPosition.x, moveNextToBlock.gridPosition.y + 1);
+        }
+
+        return tempBlocks;
     }
 }
 
